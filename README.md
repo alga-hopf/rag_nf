@@ -1,17 +1,13 @@
 # Normal form for right angled groups
 
-Package to compute the normal form for elements in right-angled group as described in \cite[]
+Functions to compute the normal form for elements in right-angled group as described in \cite[]
 
-# FIX PATH IN DEMO
+## Getting started
 
-# Package Requirement
-- [NetworkX](https://networkx.org/) >= 2.3 
-- [Matplotlib](https://matplotlib.org/) >= 3.1.2 
+The repo contains functions to compute the normal form for right-angled groups. One can start playing with these functions using the jupyter notebook ``example.ipynb``.
 
-# Getting started
+## Dependencies
+- [NetworkX](https://networkx.org/) >= 2.8 
+- Python >=3.10
 
-# Example
 
-# Contact
-
-# Cite
