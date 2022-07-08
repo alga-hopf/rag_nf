@@ -9,5 +9,6 @@ The repo contains functions to compute the normal form for right-angled groups. 
 ## Dependencies
 - [NetworkX](https://networkx.org/) >= 2.8 
 - Python >=3.10
+- Numpy >=1.23
 
 
