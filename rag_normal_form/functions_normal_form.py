@@ -1,12 +1,21 @@
-
-
-# # Normal form for right angled groups
-# 
-# These functions allow to compute explicitly the normal form for elements in a right-angled group (RAG)
-
+'''
+   This functions allo to compute the normal form for elements in right-angled 
+   groups, as explained in ...
+   
+   Copyright (C) 2022  Alice Gatti
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+'''
 
 import networkx as nx
-from matplotlib import pyplot as plt
 from itertools import combinations
 from collections import Counter
 import numpy as np
@@ -32,7 +41,7 @@ def draw_graph(GG):
     Vw=GG[1][1]
     vertex_colors=['grey' if i+1 in Vb else 'white' for i in range(G.number_of_nodes())]
     nx.draw(G,node_color=vertex_colors,with_labels=True,linewidths=1,edgecolors='black')
-    plt.show()
+
 
 # Some functions used to handle graphs
     
