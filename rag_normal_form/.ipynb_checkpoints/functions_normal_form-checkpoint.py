@@ -5,12 +5,11 @@
 # These notebook allows to compute explicitly the normal form for elements in a right-angled group (RAG) with SageMath
 
 
-
 import networkx as nx
 from matplotlib import pyplot as plt
 from itertools import combinations
 from collections import Counter
-
+import numpy as np
 
 # Function for inseerting an element for which we want to compute the normal form. l is a list containing the representation of the element that
 # we want to study. More precisely, each element is the index of the generator appearing in that position
@@ -18,10 +17,12 @@ from collections import Counter
 def element(l,GG):
     return [l+['nan'],GG]
 
-# Function that defines the bicolored graph. It takes as input the vertices dictionary of the graph and the list of indices of black vertices
+# Function that defines the bicolored graph. It takes as input some data of the graph and the list of indices of black vertices.
+# The data can be a dictionary of connections, the adjacency matrix, the incidence matrix or whatever object you can feed the networkx function
+# "Graph" with
 def bic_graph(vert_dict,Vb):
     G=nx.Graph(vert_dict)
-    Vw=[v for v in vert_dict.keys() if v not in Vb]
+    Vw=[v for v in range(1,G.number_of_nodes()+1) if v not in Vb]
     return [G,[Vb,Vw]]
 
 # Function that draws the bicolored graph from which we want to build the group
@@ -35,7 +36,7 @@ def draw_graph(GG):
 
 # Some functions used to handle graphs
     
-# List containing the cliques of the graph G represented as sets
+# List containing the cliques of the graph G
 def cliques(GG):
     G=GG[0]
     cliques=nx.enumerate_all_cliques(G)
@@ -47,13 +48,11 @@ def cliquesExt(GG):
     cliquesExt=[]
     for s in cliques(GG):
         S=s+[-s[i] for i in range(len(s))]
-        #S=s.union(Set([-s[i] for i in range(s.cardinality())]))
         for j in range(len(s),len(S)+1):
             tempComb=list(combinations(S,j))
             for k in range(len(tempComb)):
                 cliquesExt.append(tempComb[k])
     cliquesExt=map(set,cliquesExt)
-    #print(list(cliquesExt))
     return list(cliquesExt)
 
 
@@ -66,7 +65,6 @@ def decomposition(X):
     dec=[]
     start=0
     for i in range(1,len(X[0])):
-        #print(set(X[0][start:i]))
         if set(X[0][start:i]) in cliques_ext and set(X[0][start:i]).union(set([X[0][i]])) not in cliques_ext:
             dec.append(X[0][start:i])
             start=i
@@ -74,12 +72,12 @@ def decomposition(X):
             continue
     return dec
 
-# Normal form obtained by using left conductors
+# Left conductors of the elements X
 def left_conductor(X):
     dec=decomposition(X)
     for i in range(len(dec)-1):
         cX=dec[len(dec)-1-i]
-        decitemp=[cX[k] for k in range(len(cX))] #dec[len(dec)-1-i]
+        decitemp=[cX[k] for k in range(len(cX))] 
         delete=[]
         for j in range(len(cX)):
             if set([cX[j]]).union(set(dec[len(dec)-2-i])) in cliquesExt(X[1]):
@@ -109,21 +107,70 @@ def normal_form_dict(X):
 # Normal form for an element in a RAG, expressed as a list of lists (the conductors are the indices of the
 # external list). Each list has length equal to the numbert of vertices and in each entry there are the exponents
 # of the corresponding generator in the corresponding conductor
+'''
 def normal_form(X):
     XX=left_conductor(X)
-    #print(XX)
     conductors=[]
     for i in range(len(XX)):
         expCond=[]
         exponents=Counter(XX[i])
-        #print(exponents)
+        for j in range(1,X[1][0].number_of_nodes()+1):
+            if j in X[1][1][0]:
+                expCond.append((exponents[j]-exponents[-j])%2)
+            else:
+                expCond.append(exponents[j]-exponents[-j])
+        if len(conductors)>0:
+            if expCond!=conductors[-1]:
+                conductors.append(expCond)
+            else:
+                conductors.remove(len(conductors))
+        else:
+            conductors.append(expCond)
+    return conductors
+'''
+def normal_form(X):
+    XX=left_conductor(X)
+    conductors=[]
+    for i in range(len(XX)):
+        expCond=[]
+        exponents=Counter(XX[i])
         for j in range(1,X[1][0].number_of_nodes()+1):
             if j in X[1][1][0]:
                 expCond.append((exponents[j]-exponents[-j])%2)
             else:
                 expCond.append(exponents[j]-exponents[-j])
         conductors.append(expCond)
+    conductors=np.array(conductors)
+    p=[]
+    for i in range(len(conductors)):
+        if (conductors[i]==np.zeros(X[1][0].number_of_nodes())).all():
+            p.append(i)
+    conductors=np.delete(conductors,p,axis=0)
+            
+    flag=1
+    while flag==1:
+        positions=[]
+        flag=0
+        for i in range(len(conductors)-1):
+            if (conductors[i]==conductors[i+1]).all():
+                flag=1
+                positions.append(i)
+                positions.append(i+1)
+        if positions!=[]:
+            conductors=np.delete(conductors,positions,axis=0)
+    
     return conductors
+
+
+# Normal form of an element X returned as a Tietze list
+def normal_form_tietze(X):
+    x_nf=normal_form(X)
+    tietze_list=[]
+    for i in range(len(x_nf)):
+        for j in range(len(x_nf[i])):
+            if x_nf[i][j]!=0:
+                tietze_list.append(j+1)
+    return [tietze_list+['nan'],X[1]]
 
 # Tests whether two words are equal, i.e., the function compares the normal forms computed as above of X and Y
 def are_equal(X,Y):
@@ -158,3 +205,12 @@ def print_normal_form(y,X):
                     s+=x+str(j+1)+str(" ")
     return s
 
+# Return the product of elements in the list x. The list x is made of elements of the group
+def dot(x):
+    X=x[0][0][:-1]
+    for i in range(1,len(x)):
+        if nx.is_isomorphic(x[0][1][0],x[i][1][0])==False:
+            return 'The elements belong to non-isomorphic groups!'
+            break
+        X=X+x[i][0][:-1]
+    return [X+['nan'],x[0][1]]
