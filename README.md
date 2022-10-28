@@ -1,6 +1,6 @@
 # Normal form for right angled groups
 
-Functions to compute the normal form for elements in right-angled group as described in \cite[]
+Functions to compute the normal form for elements in right-angled groups.
 
 ## Getting started
 
